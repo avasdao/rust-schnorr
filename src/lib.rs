@@ -11,14 +11,14 @@ pub mod adapter;
 mod crypto;
 mod math;
 
-pub fn sign_message(sk: &SecretKey, message: &str) -> Vec<u8> {
+pub fn sign_message(sk: &SecretKey, message: &[u8]) -> Vec<u8> {
 	let randomness_keypair = crypto::calculate_signature_r_keypair(&sk, &message);
 	let signature_s = crypto::sign_message_raw(&sk, &message, &randomness_keypair);
 
 	return crypto::encode_signature(&crypto::Signature(randomness_keypair.1, signature_s));
 }
 
-pub fn verify_signature(pk: &PublicKey, message: &str, signature: &[u8]) -> bool {
+pub fn verify_signature(pk: &PublicKey, message: &[u8], signature: &[u8]) -> bool {
 	let decoded_signature = crypto::decode_signature(&signature);
 	if decoded_signature.is_err() {
 		return false;
@@ -30,12 +30,14 @@ pub fn verify_signature(pk: &PublicKey, message: &str, signature: &[u8]) -> bool
 #[cfg(test)]
 mod tests {
 	use std::str::FromStr;
+	use std::str::from_utf8;
 
 	use secp256k1::{PublicKey, SecretKey};
 
 	#[test]
 	fn it_works() {
-		let message = "Arik is rolling his own crypto";
+		// let message = "Arik is rolling his own crypto";
+		let message = [240, 159, 146, 150]; // 💖
 		let sk = SecretKey::from_str("e5d5ca46ab3fe61af6a001e02a5b979ee2c1f205c94804dd575aa6134de43ab3").unwrap();
 		let signature = super::sign_message(&sk, &message);
 
